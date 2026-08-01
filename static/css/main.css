@@ -123,6 +123,21 @@ main { padding: 2.5rem 1.25rem 3rem; min-height: calc(100vh - 140px); }
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
+.choice-card-upload::before {
+    background: radial-gradient(300px 150px at 50% 0%, rgba(39, 100, 244, 0.15), transparent 70%);
+}
+.choice-card-download::before {
+    background: radial-gradient(300px 150px at 50% 0%, rgba(183, 38, 205, 0.15), transparent 70%);
+}   
+
+.choice-card-upload:hover::before { opacity: 1; }       
+
+.choice-card-download:hover::before { opacity: 1; } 
+
+.choice-card-download:hover {
+    border-color: var(--magenta);
+}
+
 .choice-card:hover::before { opacity: 1; }
 
 .choice-icon { font-size: 2.6rem; position: relative; }
