@@ -576,3 +576,13 @@ select.form-input { cursor: pointer; }
     .hero h1 { font-size: 1.7rem; }
     .token-display { font-size: 1.9rem; letter-spacing: 4px; }
 }
+
+
+/* --my css-- */
+#pick-files:hover {
+    border-color: var(--gold);
+}
+
+#pick-folder:hover {
+    border-color: var(--indigo);
+}
