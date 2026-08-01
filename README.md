@@ -53,7 +53,7 @@ All configuration lives in `.env` (copy from `.env.example`). Everything has a s
 
 ## Working Snapshots
 
-![home page]('images/1.webp')
+![home page](images/1.webp)
 
 ![upload page]('images/2.webp')
 
