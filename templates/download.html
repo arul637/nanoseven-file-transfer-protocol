@@ -36,8 +36,8 @@
             {% set single_use = share.download_limit == 1 and share.files.count() > 1 %}
 
             <div class="share-meta">
-                <span>Uploaded {{ share.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</span>
-                <span>Expires {{ share.expires_at.strftime('%Y-%m-%d %H:%M') }} UTC</span>
+                <span>Uploaded <time class="local-time" datetime="{{ share.created_at.isoformat() }}"></time></span>
+                <span>Expires <time class="local-time" datetime="{{ share.expires_at.isoformat() }}"></time></span>
                 <span>Limit:
                     {% if share.remaining is not none %}
                         {{ share.remaining }} of {{ share.limit_label }} left
@@ -49,6 +49,13 @@
                     <span class="badge-enc"><i class="fa-solid fa-lock"></i> Encrypted</span>
                 {% endif %}
             </div>
+
+            {% if share.remaining is not none or share.download_limit is none %}
+                <div class="expiry-countdown">
+                    <i class="fa-solid fa-hourglass-half c-gold"></i>
+                    Expires in <strong id="countdown-timer" data-until="{{ share.expires_at.isoformat() }}">--:--</strong>
+                </div>
+            {% endif %}
 
             {% if single_use %}
                 <p class="single-use-note">

@@ -51,7 +51,7 @@ def csrf_protect():
 
 
 def cleanup_expired():
-    now = datetime.utcnow()
+    now = datetime.now()
     expired = Share.query.filter(Share.expires_at <= now).all()
     for share in expired:
         delete_share_files(share)
@@ -152,7 +152,7 @@ def upload():
             share = Share(
                 token=token, # type: ignore
                 download_limit=limit, # type: ignore
-                expires_at=datetime.utcnow() + expiry, # type: ignore
+                expires_at=datetime.now() + expiry, # type: ignore
             )
             share.set_password(password)
             if password:
@@ -175,7 +175,7 @@ def upload():
         'success': True,
         'token': share.token_str,
         'has_password': bool(password),
-        'expires_at': share.expires_at.strftime('%Y-%m-%d %H:%M UTC'),
+        'expires_at': share.expires_at.strftime('%Y-%m-%d %H:%M %Z'),
         'file_count': len(saved),
     })
 

@@ -443,6 +443,32 @@ select.form-input { cursor: pointer; }
     text-align: center;
 }
 
+.expiry-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+    padding: 0.35rem 0.9rem;
+    background: rgba(39, 100, 244, 0.1);
+    border: 1px solid rgba(39, 100, 244, 0.3);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--text2);
+}
+
+.expiry-countdown strong {
+    font-family: 'SF Mono', Monaco, monospace;
+    color: var(--text);
+    letter-spacing: 0.5px;
+}
+
+.expiry-countdown.expired {
+    background: rgba(220, 38, 37, 0.1);
+    border-color: var(--red);
+    color: var(--red);
+}
+.expiry-countdown.expired strong { color: var(--red); }
+
 .files-list { text-align: left; margin: 1.25rem 0; }
 .file-row {
     display: flex;

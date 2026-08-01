@@ -14,7 +14,7 @@ class Share(db.Model):
     salt = db.Column(db.String(64), nullable=True)
     download_limit = db.Column(db.Integer, nullable=True)
     downloads = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     expires_at = db.Column(db.DateTime, nullable=False)
 
     files = db.relationship('SharedFile', backref='share', lazy='dynamic',
@@ -36,7 +36,7 @@ class Share(db.Model):
 
     @property
     def expired(self):
-        return datetime.utcnow() > self.expires_at
+        return datetime.now() > self.expires_at
 
     @property
     def limit_reached(self):

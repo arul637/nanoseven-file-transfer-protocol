@@ -43,6 +43,49 @@
         document.body.removeChild(ta);
     }
 
+    // ---------- Local time display + expiry countdown (download page) ----------
+    function fmtLocal(iso) {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleString(undefined, {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit',
+        });
+    }
+
+    document.querySelectorAll('time.local-time').forEach((el) => {
+        const iso = el.getAttribute('datetime');
+        if (iso) el.textContent = fmtLocal(iso);
+    });
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function runCountdown() {
+        const el = qs('#countdown-timer');
+        if (!el) return;
+        const until = new Date(el.getAttribute('data-until')).getTime();
+        if (isNaN(until)) return;
+
+        const tick = () => {
+            const ms = until - Date.now();
+            if (ms <= 0) {
+                el.textContent = '00:00';
+                el.parentElement.classList.add('expired');
+                clearInterval(timer);
+                return;
+            }
+            const total = Math.floor(ms / 1000);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+            el.textContent = h > 0 ? h + ':' + pad2(m) + ':' + pad2(s) : pad2(m) + ':' + pad2(s);
+        };
+        tick();
+        const timer = setInterval(tick, 1000);
+    }
+
+    runCountdown();
+
     // ---------- Landing choice ----------
     const uploadModule = qs('#upload-module');
     const landingActions = qs('.landing-actions');
