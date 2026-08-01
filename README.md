@@ -55,9 +55,9 @@ All configuration lives in `.env` (copy from `.env.example`). Everything has a s
 
 ![home page](images/1.webp)
 
-![upload page]('images/2.webp')
+![upload page](images/2.webp)
 
-![download page]('images/3.webp')
+![download page](images/3.webp)
 
 ---
 
