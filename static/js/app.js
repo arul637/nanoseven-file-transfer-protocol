@@ -123,38 +123,58 @@
         expHours.value = '0';
         expMinutes.value = '0';
 
-        function clamp(input, max, fallback) {
-            if (input.value === '') { input.value = fallback; return; }
-            let v = parseInt(input.value, 10);
-            if (isNaN(v)) v = fallback;
-            v = Math.max(0, Math.min(v, max));
-            input.value = String(v);
+        const MAX_MINUTES = 24 * 60;
+
+        function numValue(el) {
+            if (el.value === '') return 0;
+            const v = parseInt(el.value, 10);
+            return isNaN(v) ? 0 : v;
         }
 
-        expDays.addEventListener('blur', () => clamp(expDays, 1, 0));
-        expHours.addEventListener('blur', () => clamp(expHours, 23, 0));
-        expMinutes.addEventListener('blur', () => clamp(expMinutes, 59, 0));
+        function clampField(el, max) {
+            if (el.value === '') { el.value = '0'; return; }
+            const v = Math.max(0, Math.min(numValue(el), max));
+            el.value = String(v);
+        }
 
-        function syncCaps() {
-            const d = parseInt(expDays.value || '0', 10);
-            const h = parseInt(expHours.value || '0', 10);
-            const m = parseInt(expMinutes.value || '0', 10);
-            expDays.max = '1';
-            if (d > 0) {
-                expHours.max = '0';
-                expMinutes.max = '0';
-            } else {
-                expHours.max = '23';
-                if (h > 0) expMinutes.max = '0';
-                else expMinutes.max = '59';
+        expDays.addEventListener('blur', () => clampField(expDays, 1));
+        expHours.addEventListener('blur', () => clampField(expHours, 23));
+        expMinutes.addEventListener('blur', () => clampField(expMinutes, 59));
+
+        function totalMinutes() {
+            return numValue(expDays) * 1440 + numValue(expHours) * 60 + numValue(expMinutes);
+        }
+
+        function fmt(total) {
+            if (total >= 1440) return '1 day';
+            if (total >= 60) {
+                const h = Math.floor(total / 60);
+                const m = total % 60;
+                return m ? h + 'h ' + m + 'm' : h + 'h';
             }
-            if (parseInt(expHours.value || '0', 10) > expHours.max) expHours.value = expHours.max;
-            if (parseInt(expMinutes.value || '0', 10) > expMinutes.max) expMinutes.value = expMinutes.max;
+            return total + 'm';
         }
 
-        expDays.addEventListener('input', syncCaps);
-        expHours.addEventListener('input', syncCaps);
-        expMinutes.addEventListener('input', syncCaps);
+        function updateExpirySummary() {
+            const total = totalMinutes();
+            const el = qs('#expiry-summary');
+            if (!el) return;
+            if (total === 0) {
+                el.textContent = 'Will not expire (0 minutes)';
+                el.classList.remove('warn');
+            } else if (total > MAX_MINUTES) {
+                el.textContent = 'Capped at 1 day (you entered ' + fmt(total) + ')';
+                el.classList.add('warn');
+            } else {
+                el.textContent = 'Expires in ' + fmt(total);
+                el.classList.remove('warn');
+            }
+        }
+
+        expDays.addEventListener('input', updateExpirySummary);
+        expHours.addEventListener('input', updateExpirySummary);
+        expMinutes.addEventListener('input', updateExpirySummary);
+        updateExpirySummary();
     }
 
     // ---------- Upload (index page) ----------
