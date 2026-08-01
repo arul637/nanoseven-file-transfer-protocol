@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}NanoShare{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/root.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="{{ url_for('index') }}" class="logo">N<span>FTP</span></a>
+            <span class="tagline">Nanoseven File Transfer Protocol</span>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+        {% if error_code is defined %}
+            <div class="error-page">
+                <div class="error-code">{{ error_code }}</div>
+                <p class="error-message">{{ error_message }}</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Go Home</a>
+            </div>
+        {% else %}
+            {% block content %}{% endblock %}
+        {% endif %}
+    </main>
+
+    <footer class="footer">@nanoseven NFTP &mdash; share files with a token</footer>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

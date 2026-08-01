@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}NFTP &mdash; Share files with a token{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>N<span>FTP</span></h1>
+    <p>Drop files &amp; folders, get a 6-digit token. Anyone with the token (and password) can download &mdash; then it's gone.</p>
+</section>
+
+<div class="landing-actions">
+    <button type="button" id="goto-upload" class="choice-card">
+        <i class="fa-solid fa-cloud-arrow-up choice-icon c-blue"></i>
+        <span class="choice-title">Upload</span>
+        <span class="choice-sub">Share files &amp; folders</span>
+    </button>
+    <button type="button" id="goto-download" class="choice-card">
+        <i class="fa-solid fa-cloud-arrow-down choice-icon c-magenta"></i>
+        <span class="choice-title">Download</span>
+        <span class="choice-sub">Retrieve by token</span>
+    </button>
+</div>
+
+<div id="upload-module" class="panel hidden">
+    <div class="panel-head">
+        <h2>Upload files</h2>
+        <button type="button" class="link-back" id="upload-back">&larr; Back</button>
+    </div>
+
+    <form id="upload-form" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+        <div id="drop-zone" class="drop-zone">
+            <i class="fa-solid fa-cloud-arrow-up dz-icon c-blue"></i>
+            <div class="dz-title">Drag &amp; drop files or folders here</div>
+            <div class="dz-sub">Both files and folders are accepted</div>
+        </div>
+
+        <div class="picker-buttons">
+            <button type="button" id="pick-files" class="btn btn-outline"><i class="fa-solid fa-file-lines c-gold"></i>&nbsp; Select files</button>
+            <button type="button" id="pick-folder" class="btn btn-outline"><i class="fa-solid fa-folder-open c-indigo"></i>&nbsp; Select folder</button>
+        </div>
+
+        <input type="file" id="file-input" name="files" multiple hidden>
+        <input type="file" id="folder-input" name="files" multiple hidden webkitdirectory>
+
+        <div id="file-list" class="file-list"></div>
+
+        <div class="upload-options">
+            <div class="field">
+                <label for="limit">Download limit</label>
+                <select id="limit" name="limit" class="form-input">
+                    <option value="unlimited" selected>Unlimited downloads</option>
+                    <option value="1">1 download only</option>
+                    <option value="5">5 downloads only</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Expires after <span class="hint">(max 1 day)</span></label>
+                <div class="expiry-grid">
+                    <div class="expiry-item">
+                        <input type="number" id="exp-days" name="days" min="0" max="1" step="1" value="0"
+                               class="form-input" aria-label="Days">
+                        <span class="expiry-unit">d</span>
+                    </div>
+                    <div class="expiry-item">
+                        <input type="number" id="exp-hours" name="hours" min="0" max="23" step="1" value="0"
+                               class="form-input" aria-label="Hours">
+                        <span class="expiry-unit">h</span>
+                    </div>
+                    <div class="expiry-item">
+                        <input type="number" id="exp-minutes" name="minutes" min="0" max="59" step="1" value="0"
+                               class="form-input" aria-label="Minutes">
+                        <span class="expiry-unit">m</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="password">Password <span class="hint">(encrypts files)</span></label>
+                <input type="password" id="password" name="password" class="form-input"
+                       placeholder="Leave empty for no password" autocomplete="new-password">
+            </div>
+        </div>
+
+        <div class="upload-actions">
+            <button type="submit" id="upload-btn" class="btn btn-primary btn-lg">Upload</button>
+        </div>
+
+        <div id="progress-wrap" class="progress-wrap hidden">
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+            <div class="progress-labels">
+                <span id="progress-status">Preparing...</span>
+                <span id="progress-percent">0%</span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Token result modal -->
+<div id="result-modal" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="modal-body token-modal">
+            <i class="fa-solid fa-key modal-icon c-green"></i>
+            <h2>Share ready</h2>
+            <p class="muted">Share this token with anyone.</p>
+            <div class="token-display" id="result-token"></div>
+            <button type="button" class="btn btn-outline btn-sm" id="copy-token">Copy token</button>
+            <p class="hint-text">The share will be deleted after the limit is reached or it expires.</p>
+            <button type="button" class="btn btn-primary btn-lg" id="result-done">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- Download modal -->
+<div id="download-modal" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="modal-body">
+            <i class="fa-solid fa-cloud-arrow-down modal-icon c-blue"></i>
+            <h2>Download</h2>
+            <p class="muted">Enter the token. Add the password if the share has one.</p>
+            <form method="POST" action="{{ url_for('download_via_modal') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="d-token">Token</label>
+                    <input type="text" id="d-token" name="token" class="form-input"
+                           placeholder="000000" maxlength="6" inputmode="numeric" required autofocus>
+                </div>
+                <div class="field">
+                    <label for="d-password">Password <span class="hint">(optional)</span></label>
+                    <input type="password" id="d-password" name="password" class="form-input"
+                           placeholder="Leave empty if none" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">Retrieve</button>
+            </form>
+            <button type="button" class="link-back" id="download-cancel">&larr; Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

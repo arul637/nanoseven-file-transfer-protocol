@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}NanoShare &mdash; Token {{ share.token_str }}{% endblock %}
+{% block content %}
+<div class="download-wrap">
+    <div class="download-card">
+        {% if not available %}
+            <i class="fa-solid fa-triangle-exclamation file-icon c-red"></i>
+            <h2>Share unavailable</h2>
+            <p class="muted">
+                {% if share.limit_reached %}
+                    The download limit for this share has been reached and the share was deleted.
+                {% else %}
+                    This share has expired and was deleted automatically.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Go Home</a>
+
+        {% elif need_auth %}
+            <i class="fa-solid fa-lock file-icon c-red"></i>
+            <h2>Token {{ share.token_str }}</h2>
+            <p class="muted">This share is password protected. Enter the password to unlock it.</p>
+            <form method="POST" action="{{ url_for('download', token=share.token_str) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input"
+                           placeholder="Enter the share password" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Unlock</button>
+            </form>
+
+        {% else %}
+            <i class="fa-solid fa-box-open file-icon c-green"></i>
+            <h2>Token {{ share.token_str }}</h2>
+
+            {% set single_use = share.download_limit == 1 and share.files.count() > 1 %}
+
+            <div class="share-meta">
+                <span>Uploaded {{ share.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</span>
+                <span>Expires {{ share.expires_at.strftime('%Y-%m-%d %H:%M') }} UTC</span>
+                <span>Limit:
+                    {% if share.remaining is not none %}
+                        {{ share.remaining }} of {{ share.limit_label }} left
+                    {% else %}
+                        Unlimited
+                    {% endif %}
+                </span>
+                {% if share.protected %}
+                    <span class="badge-enc"><i class="fa-solid fa-lock"></i> Encrypted</span>
+                {% endif %}
+            </div>
+
+            {% if single_use %}
+                <p class="single-use-note">
+                    <i class="fa-solid fa-circle-info c-gold"></i>
+                    This share allows only <strong>1 download</strong>. All files are delivered together in a single ZIP.
+                </p>
+                <a href="{{ url_for('download_zip', token=share.token_str) }}"
+                   class="btn btn-primary btn-lg" style="width:100%;">Download all files as ZIP</a>
+
+            {% else %}
+                <div class="files-list">
+                    {% for sf in share.files %}
+                    <div class="file-row">
+                        <i class="fa-solid fa-file file-icon-sm c-blue"></i>
+                        <div class="file-info">
+                            <div class="fname">{{ sf.original_filename }}</div>
+                            <div class="fsize">{{ sf.size_display }}</div>
+                        </div>
+                        <a href="{{ url_for('download_file', token=share.token_str, file_id=sf.id) }}"
+                           class="btn btn-outline btn-sm">Download</a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if share.files.count() > 1 %}
+                    <a href="{{ url_for('download_zip', token=share.token_str) }}"
+                       class="btn btn-primary btn-lg" style="width:100%;">Download all as ZIP</a>
+                {% else %}
+                    <form method="POST" action="{{ url_for('download', token=share.token_str) }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Download file</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
