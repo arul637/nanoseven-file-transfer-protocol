@@ -34,7 +34,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open http://localhost:5000
+Then open http://localhost:5001
 
 The SQLite database is created automatically at `instance/nanoshare.db` on first run.
 
